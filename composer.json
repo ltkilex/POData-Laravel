@@ -6,12 +6,12 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/kirill533/POData",
+            "url": "https://github.com/Kirich11/POData",
             "no-api": true
         }
     ],
     "require": {
-        "algo-web/podata": "dev-master",
+        "algo-web/podata": "dev-newdependencies",
         "doctrine/dbal": "^2.5",
         "php": ">=5.6.4",
         "laravel/framework": ">=5.1.11",
