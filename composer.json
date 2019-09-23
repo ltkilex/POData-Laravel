@@ -6,7 +6,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/Kirich11/POData",
+            "url": "https://github.com/kirill533/POData",
             "no-api": true
         }
     ],
