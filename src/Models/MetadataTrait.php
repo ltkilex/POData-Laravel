@@ -1,4 +1,5 @@
 <?php
+
 namespace AlgoWeb\PODataLaravel\Models;
 
 use AlgoWeb\PODataLaravel\Models\ObjectMap\Entities\Associations\AssociationStubMonomorphic;
@@ -8,7 +9,6 @@ use AlgoWeb\PODataLaravel\Models\ObjectMap\Entities\EntityField;
 use AlgoWeb\PODataLaravel\Models\ObjectMap\Entities\EntityFieldPrimitiveType;
 use AlgoWeb\PODataLaravel\Models\ObjectMap\Entities\EntityFieldType;
 use AlgoWeb\PODataLaravel\Models\ObjectMap\Entities\EntityGubbins;
-use AlgoWeb\PODataLaravel\Query\LaravelReadQuery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -87,7 +87,7 @@ trait MetadataTrait
             $tableData[$column] = ['type' => $type,
                 'nullable' => $nullable,
                 'fillable' => $fillable,
-                'default' => $default
+                'default' => $default,
             ];
         }
 
@@ -108,6 +108,7 @@ trait MetadataTrait
         }
 
         self::$tableData = $tableData;
+
         return $tableData;
     }
 
@@ -143,10 +144,12 @@ trait MetadataTrait
 
         if (!isset($endpoint)) {
             $bitter = get_class($this);
-            $name = substr($bitter, strrpos($bitter, '\\')+1);
-            return ($name);
+            $name = substr($bitter, strrpos($bitter, '\\') + 1);
+
+            return $name;
         }
-        return ($endpoint);
+
+        return $endpoint;
     }
 
     /**
@@ -215,7 +218,7 @@ trait MetadataTrait
                 'HasOne' => [],
                 'UnknownPolyMorphSide' => [],
                 'HasMany' => [],
-                'KnownPolyMorphSide' => []
+                'KnownPolyMorphSide' => [],
             ];
             $methods = get_class_methods($model);
             if (!empty($methods)) {
@@ -229,7 +232,7 @@ trait MetadataTrait
                         $fileName = $reflection->getFileName();
 
                         $file = new \SplFileObject($fileName);
-                        $file->seek($reflection->getStartLine()-1);
+                        $file->seek($reflection->getStartLine() - 1);
                         $code = '';
                         while ($file->key() < $reflection->getEndLine()) {
                             $code .= $file->current();
@@ -242,8 +245,8 @@ trait MetadataTrait
                             throw new InvalidOperationException($msg);
                         }
                         $begin = strpos($code, 'function(');
-                        $code = substr($code, /* @scrutinizer ignore-type */$begin, strrpos($code, '}')-$begin+1);
-                        $lastCode = $code[strlen(/* @scrutinizer ignore-type */$code)-1];
+                        $code = substr($code, /* @scrutinizer ignore-type */$begin, strrpos($code, '}') - $begin + 1);
+                        $lastCode = $code[strlen(/* @scrutinizer ignore-type */$code) - 1];
                         if ('}' != $lastCode) {
                             $msg = 'Final character of function definition must be closing brace';
                             throw new InvalidOperationException($msg);
@@ -258,15 +261,15 @@ trait MetadataTrait
                                      'morphTo',
                                      'morphMany',
                                      'morphToMany',
-                                     'morphedByMany'
+                                     'morphedByMany',
                                  ] as $relation) {
-                            $search = '$this->' . $relation . '(';
+                            $search = '$this->'.$relation.'(';
                             if (stripos(/* @scrutinizer ignore-type */$code, $search)) {
                                 //Resolve the relation's model to a Relation object.
                                 $relationObj = $model->$method();
                                 if ($relationObj instanceof Relation) {
                                     $relObject = $relationObj->getRelated();
-                                    $relatedModel = '\\' . get_class($relObject);
+                                    $relatedModel = '\\'.get_class($relObject);
                                     if (in_array(MetadataTrait::class, class_uses($relatedModel))) {
                                         $relations = [
                                             'hasManyThrough',
@@ -274,7 +277,7 @@ trait MetadataTrait
                                             'hasMany',
                                             'morphMany',
                                             'morphToMany',
-                                            'morphedByMany'
+                                            'morphedByMany',
                                         ];
                                         if (in_array($relation, $relations)) {
                                             //Collection or array of models (because Collection is Arrayable)
@@ -304,6 +307,7 @@ trait MetadataTrait
             }
             static::$relationCategories[$biDirVal] = $relationships;
         }
+
         return static::$relationCategories[$biDirVal];
     }
 
@@ -386,6 +390,7 @@ trait MetadataTrait
             $residual = substr(/* @scrutinizer ignore-type */$residual, 0, -9);
             $methods[] = $residual;
         }
+
         return $methods;
     }
 
@@ -398,7 +403,7 @@ trait MetadataTrait
     private function polyglotKeyMethodNames($foo, $condition = false)
     {
         $fkList = ['getQualifiedForeignKeyName', 'getForeignKey'];
-        $rkList = ['getQualifiedRelatedKeyName', 'getOtherKey', 'getOwnerKey'];
+        $rkList = ['getQualifiedRelatedKeyName', 'getQualifiedRelatedPivotKeyName', 'getQualifiedOwnerKeyName', 'getOtherKey', 'getOwnerKey'];
 
         $fkMethodName = null;
         $rkMethodName = null;
@@ -417,7 +422,7 @@ trait MetadataTrait
                     }
                 }
                 if (!(in_array($fkMethodName, $methodList))) {
-                    $msg = 'Selected method, ' . $fkMethodName . ', not in method list';
+                    $msg = 'Selected method, '.$fkMethodName.', not in method list';
                     throw new InvalidOperationException($msg);
                 }
                 $rkMethodName = 'getQualifiedRelatedPivotKeyName';
@@ -428,13 +433,14 @@ trait MetadataTrait
                     }
                 }
                 if (!(in_array($rkMethodName, $methodList))) {
-                    $msg = 'Selected method, ' . $rkMethodName . ', not in method list';
+                    $msg = 'Selected method, '.$rkMethodName.', not in method list';
                     throw new InvalidOperationException($msg);
                 }
                 $line = ['fk' => $fkMethodName, 'rk' => $rkMethodName];
                 static::$methodPrimary[get_class($foo)] = $line;
             }
         }
+
         return [$fkMethodName, $rkMethodName];
     }
 
@@ -454,28 +460,29 @@ trait MetadataTrait
                 $methodList = get_class_methods(get_class($foo));
                 $fkCombo = array_values(array_intersect($fkList, $methodList));
                 if (!(1 <= count($fkCombo))) {
-                    $msg = 'Expected at least 1 element in foreign-key list, got ' . count($fkCombo);
+                    $msg = 'Expected at least 1 element in foreign-key list, got '.count($fkCombo);
                     throw new InvalidOperationException($msg);
                 }
                 $fkMethodName = $fkCombo[0];
                 if (!(in_array($fkMethodName, $methodList))) {
-                    $msg = 'Selected method, ' . $fkMethodName . ', not in method list';
+                    $msg = 'Selected method, '.$fkMethodName.', not in method list';
                     throw new InvalidOperationException($msg);
                 }
                 $rkCombo = array_values(array_intersect($rkList, $methodList));
                 if (!(1 <= count($rkCombo))) {
-                    $msg = 'Expected at least 1 element in related-key list, got ' . count($rkCombo);
+                    $msg = 'Expected at least 1 element in related-key list, got '.count($rkCombo);
                     throw new InvalidOperationException($msg);
                 }
                 $rkMethodName = $rkCombo[0];
                 if (!(in_array($rkMethodName, $methodList))) {
-                    $msg = 'Selected method, ' . $rkMethodName . ', not in method list';
+                    $msg = 'Selected method, '.$rkMethodName.', not in method list';
                     throw new InvalidOperationException($msg);
                 }
                 $line = ['fk' => $fkMethodName, 'rk' => $rkMethodName];
                 static::$methodAlternate[get_class($foo)] = $line;
             }
         }
+
         return [$fkMethodName, $rkMethodName];
     }
 
@@ -485,9 +492,9 @@ trait MetadataTrait
 
         $methodList = get_class_methods(get_class($foo));
         $thruCombo = array_values(array_intersect($thruList, $methodList));
+
         return $thruCombo[0];
     }
-
 
     /**
      * @param             $hooks
@@ -497,8 +504,8 @@ trait MetadataTrait
      * @param             $mult
      * @param             $targ
      * @param string|null $targ
-     * @param null|mixed  $type
-     * @param null|mixed  $through
+     * @param mixed|null  $type
+     * @param mixed|null  $through
      */
     private function addRelationsHook(&$hooks, $first, $property, $last, $mult, $targ, $type = null, $through = null)
     {
@@ -513,7 +520,7 @@ trait MetadataTrait
             'local' => $last,
             'through' => $through,
             'multiplicity' => $mult,
-            'type' => $type
+            'type' => $type,
         ];
     }
 
@@ -533,14 +540,14 @@ trait MetadataTrait
 
             $keyRaw = $foo->$fkMethodName();
             $keySegments = explode('.', $keyRaw);
-            $keyName = $keySegments[count($keySegments)-1];
+            $keyName = $keySegments[count($keySegments) - 1];
             $localRaw = $foo->$rkMethodName();
             $localSegments = explode('.', $localRaw);
-            $localName = $localSegments[count($localSegments)-1];
+            $localName = $localSegments[count($localSegments) - 1];
             if (null !== $thruName) {
                 $thruRaw = $foo->$thruName();
                 $thruSegments = explode('.', $thruRaw);
-                $thruName = $thruSegments[count($thruSegments)-1];
+                $thruName = $thruSegments[count($thruSegments) - 1];
             }
             $first = $keyName;
             $last = $localName;
@@ -567,10 +574,10 @@ trait MetadataTrait
 
             $keyName = $isBelong ? $foo->$fkMethodName() : $foo->$fkMethodAlternate();
             $keySegments = explode('.', $keyName);
-            $keyName = $keySegments[count($keySegments)-1];
+            $keyName = $keySegments[count($keySegments) - 1];
             $localRaw = $isBelong ? $foo->$rkMethodName() : $foo->$rkMethodAlternate();
             $localSegments = explode('.', $localRaw);
-            $localName = $localSegments[count($localSegments)-1];
+            $localName = $localSegments[count($localSegments) - 1];
             $first = $isBelong ? $localName : $keyName;
             $last = $isBelong ? $keyName : $localName;
             $this->addRelationsHook($hooks, $first, $property, $last, $mult, $targ);
@@ -594,10 +601,10 @@ trait MetadataTrait
 
             $keyRaw = $isMany ? $foo->$fkMethodName() : $foo->$fkMethodAlternate();
             $keySegments = explode('.', $keyRaw);
-            $keyName = $keySegments[count($keySegments)-1];
+            $keyName = $keySegments[count($keySegments) - 1];
             $localRaw = $isMany ? $foo->$rkMethodName() : $foo->$rkMethodAlternate();
             $localSegments = explode('.', $localRaw);
-            $localName = $localSegments[count($localSegments)-1];
+            $localName = $localSegments[count($localSegments) - 1];
             $first = $isMany ? $keyName : $localName;
             $last = $isMany ? $localName : $keyName;
             $this->addRelationsHook($hooks, $first, $property, $last, $mult, $targ, 'unknown');
@@ -620,10 +627,10 @@ trait MetadataTrait
 
             $keyRaw = $isMany ? $foo->$fkMethodName() : $foo->$fkMethodAlternate();
             $keySegments = explode('.', $keyRaw);
-            $keyName = $keySegments[count($keySegments)-1];
+            $keyName = $keySegments[count($keySegments) - 1];
             $localRaw = $isMany ? $foo->$rkMethodName() : $foo->$rkMethodAlternate();
             $localSegments = explode('.', $localRaw);
-            $localName = $localSegments[count($localSegments)-1];
+            $localName = $localSegments[count($localSegments) - 1];
 
             $first = $keyName;
             $last = (isset($localName) && '' != $localName) ? $localName : $foo->getRelated()->getKeyName();
@@ -639,7 +646,8 @@ trait MetadataTrait
     public function retrieveCasts()
     {
         $exists = method_exists($this, 'getCasts');
-        return $exists ? (array)$this->getCasts() : (array)$this->casts;
+
+        return $exists ? (array) $this->getCasts() : (array) $this->casts;
     }
 
     /**
@@ -670,6 +678,7 @@ trait MetadataTrait
         // isKnownPolymorph needs to be checking KnownPolymorphSide results - if you're checking UnknownPolymorphSide,
         // you're turned around
         $rels = $this->getRelationshipsFromMethods();
+
         return !empty($rels['KnownPolyMorphSide']);
     }
 
@@ -681,6 +690,7 @@ trait MetadataTrait
         // isUnknownPolymorph needs to be checking UnknownPolymorphSide results - if you're checking KnownPolymorphSide,
         // you're turned around
         $rels = $this->getRelationshipsFromMethods();
+
         return !empty($rels['UnknownPolyMorphSide']);
     }
 
@@ -694,7 +704,7 @@ trait MetadataTrait
         $multArray = [
             '*' => AssociationStubRelationType::MANY(),
             '1' => AssociationStubRelationType::ONE(),
-            '0..1' => AssociationStubRelationType::NULL_ONE()
+            '0..1' => AssociationStubRelationType::NULL_ONE(),
         ];
 
         $gubbins = new EntityGubbins();
@@ -781,8 +791,9 @@ trait MetadataTrait
             $builder = $connect->getSchemaBuilder();
             $columns = $builder->getColumnListing($table);
 
-            self::$tableColumns = (array)$columns;
+            self::$tableColumns = (array) $columns;
         }
+
         return self::$tableColumns;
     }
 
@@ -800,6 +811,7 @@ trait MetadataTrait
 
             self::$tableColumnsDoctrine = $columns;
         }
+
         return self::$tableColumnsDoctrine;
     }
 
@@ -811,7 +823,8 @@ trait MetadataTrait
     }
 
     /**
-     * @param  mixed      $foo
+     * @param mixed $foo
+     *
      * @return array|null
      */
     private function getRelationsHasManyKeyNames($foo)
@@ -820,12 +833,15 @@ trait MetadataTrait
         if ($foo instanceof HasManyThrough) {
             list($fkMethodName, $rkMethodName) = $this->polyglotKeyMethodBackupNames($foo, true);
             $thruName = $this->polyglotThroughKeyMethodNames($foo);
+
             return array($thruName, $fkMethodName, $rkMethodName);
         } elseif ($foo instanceof BelongsToMany) {
             list($fkMethodName, $rkMethodName) = $this->polyglotKeyMethodNames($foo, true);
+
             return array($thruName, $fkMethodName, $rkMethodName);
         } else {
             list($fkMethodName, $rkMethodName) = $this->polyglotKeyMethodBackupNames($foo, true);
+
             return array($thruName, $fkMethodName, $rkMethodName);
         }
     }
