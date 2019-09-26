@@ -67,6 +67,7 @@ trait MetadataTrait
         $rawFoo = $this->getTableDoctrineColumns();
         $foo = [];
         $getters = $this->collectGetters();
+        $getters = array_map('strtolower', $getters);
         $getters = array_intersect($getters, $mask);
         $casts = $this->retrieveCasts();
 
