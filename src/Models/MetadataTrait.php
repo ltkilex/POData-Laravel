@@ -247,7 +247,7 @@ trait MetadataTrait
                         }
                         $begin = strpos($code, 'function(');
                         $code = substr($code, /* @scrutinizer ignore-type */$begin, strrpos($code, '}') - $begin + 1);
-                        $lastCode = $code[mb_strlen(/* @scrutinizer ignore-type */$code) - 1];
+                        $lastCode = $code[strlen(/* @scrutinizer ignore-type */$code) - 1];
                         if ('}' != $lastCode) {
                             $msg = 'Final character of function definition must be closing brace';
                             throw new InvalidOperationException($msg);
