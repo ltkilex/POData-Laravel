@@ -73,7 +73,7 @@ trait MetadataTrait
 
         foreach ($rawFoo as $key => $val) {
             // Work around glitch in Doctrine when reading from MariaDB which added ` characters to root key value
-            $key = preg_replace("/\'|\"|\`/g", '', $key);
+            $key = preg_replace("/\'|\"|\`/", '', $key);
             $foo[$key] = $val;
         }
 
