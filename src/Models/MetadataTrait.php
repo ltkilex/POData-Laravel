@@ -60,7 +60,7 @@ trait MetadataTrait
 
         $columns = $this->getTableColumns();
         $mask = $this->metadataMask();
-        $mask = array_map('strotolower', $mask);
+        $mask = array_map('strtolower', $mask);
         $columns = array_intersect($columns, $mask);
 
         $tableData = [];
