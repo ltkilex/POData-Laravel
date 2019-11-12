@@ -797,6 +797,9 @@ class IronicSerialiser implements IObjectSerialiser
         if (empty($skipToken)) {
             throw new InvalidOperationException('!is_null($skipToken)');
         }
+        if ($lastObject instanceof Model && $lastObject->usePaginate()) {
+            $skipToken = $currentExpandedProjectionNode->getSkipCount() + $currentExpandedProjectionNode->getTakeCount();
+        }
         $token = (1 < $numSegments) ? '$skiptoken=' : '$skip=';
         $skipToken = (1 < $numSegments) ? $skipToken : intval(trim($skipToken, '\''));
         $skipToken = '?' . $queryParameterString . $token . $skipToken;

@@ -829,4 +829,12 @@ trait MetadataTrait
             return array($thruName, $fkMethodName, $rkMethodName);
         }
     }
+
+    /**
+     * @return bool
+     */
+    public function usePaginate()
+    {
+        return true;
+    }
 }
